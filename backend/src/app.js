@@ -3,7 +3,6 @@ import cors from 'cors';
 import morgan from 'morgan';
 import helmet from 'helmet';
 import compression from 'compression';
-import mongoSanitize from 'express-mongo-sanitize';
 import rateLimit from 'express-rate-limit';
 import path from 'node:path';
 import fs from 'node:fs';
@@ -22,15 +21,34 @@ app.set('trust proxy', 1);
 // Security headers
 app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
 
-// Body parsing and basic middlewares
-
 // CORS
 const origins = (process.env.CLIENT_ORIGIN || 'http://localhost:5173').split(',');
 app.use(cors({ origin: origins, credentials: true }));
 
+// Body parsing + logging
 app.use(express.json({ limit: '2mb' }));
 app.use(morgan('dev'));
-app.use(mongoSanitize());
+
+// Custom in-place sanitizer for Express 5 (avoid assigning req.query)
+function deepSanitize(obj) {
+  if (!obj || typeof obj !== 'object') return;
+  for (const k of Object.keys(obj)) {
+    if (k.startsWith('$') || k.includes('.')) {
+      delete obj[k];
+      continue;
+    }
+    const v = obj[k];
+    if (v && typeof v === 'object') deepSanitize(v);
+  }
+}
+app.use((req, _res, next) => {
+  try { deepSanitize(req.body); } catch {}
+  try { deepSanitize(req.params); } catch {}
+  try { deepSanitize(req.query); } catch {}
+  next();
+});
+
+// Compression
 app.use(compression());
 
 // Static for uploaded files
@@ -38,6 +56,7 @@ const uploadDir = process.env.UPLOAD_DIR || 'uploads';
 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
 app.use('/uploads', express.static(path.resolve(uploadDir)));
 
+// Health/root
 app.get('/', (_req, res) => res.json({ ok: true }));
 ensureAdmin().catch(console.error);
 
@@ -76,6 +95,7 @@ app.get('/api/me', auth, async (req, res) => {
   return getProfile(req, res);
 });
 
+// Routes
 app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/students', studentRoutes);
 app.use('/api/admin', adminRoutes);
@@ -88,6 +108,3 @@ app.use((err, _req, res, _next) => {
 });
 
 export default app;
-
-
-
