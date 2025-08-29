@@ -1,17 +1,17 @@
 ﻿{
     "version":  2,
-    "rewrites":  [
-                     {
-                         "destination":  "https://miniproject2-2.onrender.com/uploads/$1",
-                         "source":  "/uploads/(.*)"
-                     },
-                     {
-                         "destination":  "https://miniproject2-2.onrender.com/api/$1",
-                         "source":  "/api/(.*)"
-                     },
-                     {
-                         "destination":  "/index.html",
-                         "source":  "/(.*)"
-                     }
-                 ]
+    "routes":  [
+                   {
+                       "src":  "/api/(.*)",
+                       "dest":  "https://miniproject2-2.onrender.com/api/$1"
+                   },
+                   {
+                       "src":  "/uploads/(.*)",
+                       "dest":  "https://miniproject2-2.onrender.com/uploads/$1"
+                   },
+                   {
+                       "src":  "/(.*)",
+                       "dest":  "/index.html"
+                   }
+               ]
 }
