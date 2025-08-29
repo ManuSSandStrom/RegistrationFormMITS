@@ -1,16 +1,17 @@
 ﻿{
+    "version":  2,
     "rewrites":  [
                      {
                          "destination":  "https://miniproject2-2.onrender.com/uploads/$1",
                          "source":  "/uploads/(.*)"
                      },
                      {
-                         "source":  "/api/(.*)",
-                         "destination":  "https://miniproject2-2.onrender.com/api/$1"
+                         "destination":  "https://miniproject2-2.onrender.com/api/$1",
+                         "source":  "/api/(.*)"
                      },
                      {
-                         "source":  "/(.*)",
-                         "destination":  "/"
+                         "destination":  "/index.html",
+                         "source":  "/(.*)"
                      }
                  ]
 }
