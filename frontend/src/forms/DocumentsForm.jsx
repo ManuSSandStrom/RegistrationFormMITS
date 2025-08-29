@@ -42,7 +42,7 @@ export default function DocumentsForm({ onDocsChange }) {
     try {
       const fd = new FormData();
       Object.keys(LABELS).forEach((k) => { if (stdFiles[k]) fd.append(k, stdFiles[k]); });
-      const { data } = await api.post("/api/students/me/documents", fd, { headers: { "Content-Type": "multipart/form-data" } });
+      const { data } = await api.post("/api/students/me/documents", fd);
       setExistingStd(data.documents || existingStd);
       setMsg("Documents uploaded successfully.");
     } catch (e) { setMsg(e?.response?.data?.error || "Upload failed"); }
@@ -56,7 +56,7 @@ export default function DocumentsForm({ onDocsChange }) {
     try {
       const fd = new FormData();
       fd.append(key, file);
-      const { data } = await api.post("/api/students/me/documents", fd, { headers: { "Content-Type": "multipart/form-data" } });
+      const { data } = await api.post("/api/students/me/documents", fd);
       setExistingStd(data.documents || existingStd);
       setMsg(`${LABELS[key]} reuploaded.`);
     } catch (e) { setMsg(e?.response?.data?.error || `Reupload failed for ${LABELS[key]}`); }
@@ -85,7 +85,7 @@ export default function DocumentsForm({ onDocsChange }) {
     try {
       const fd = new FormData();
       items.forEach((it) => { fd.append("names", it.name || "Attachment"); fd.append("extras", it.file); });
-      const { data } = await api.post("/api/students/me/attachments", fd, { headers: { "Content-Type": "multipart/form-data" } });
+      const { data } = await api.post("/api/students/me/attachments", fd);
       setExistingExtras([...(existingExtras || []), ...(data.added || [])]);
       setExtras([{ name: "", file: null }]);
       setMsg("Additional files uploaded.");
