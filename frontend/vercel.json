@@ -1,0 +1,6 @@
+﻿{
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "https://miniproject2-2.onrender.com/api/$1" },
+    { "source": "/(.*)", "destination": "/" }
+  ]
+}
