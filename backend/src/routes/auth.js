@@ -8,9 +8,9 @@ import { auth } from '../middleware/auth.js';
 const router = Router();
 
 router.post('/register', async (req, res) => {
-  const { name, email, password, course } = req.body || {};
+  let { name, email, password, course } = req.body || {};\n  name = (name || '').toString().trim();\n  email = (email || '').toString().trim().toLowerCase();\n  password = (password || '').toString();\n  course = (course || '').toString().trim();
   if (!name || !email || !password || !course) return res.status(400).json({ error: 'Missing fields' });
-  if (!/@gmail\.com$/i.test(email)) return res.status(400).json({ error: 'Email must be Gmail' });
+  if (!/^[\\w.+-]+@gmail\\.com$/.test(email)) return res.status(400).json({ error: 'Email must be Gmail' });
   const existing = await User.findOne({ email });
   if (existing) return res.status(409).json({ error: 'Email already registered' });
   const hash = await bcrypt.hash(password, 10);
@@ -21,7 +21,7 @@ router.post('/register', async (req, res) => {
 });
 
 router.post('/login', async (req, res) => {
-  const { email, password } = req.body || {};
+  let { email, password } = req.body || {};\n  email = (email || '').toString().trim().toLowerCase();\n  password = (password || '').toString();
   if (!email || !password) return res.status(400).json({ error: 'Missing credentials' });
   const user = await User.findOne({ email });
   if (!user) return res.status(401).json({ error: 'Invalid credentials' });
