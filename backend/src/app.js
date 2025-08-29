@@ -39,7 +39,36 @@ if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
 app.use('/uploads', express.static(path.resolve(uploadDir)));
 
 app.get('/', (_req, res) => res.json({ ok: true }));
-ensureAdmin().catch(console.error);\n\n// Rate limits\nconst WINDOW_MS = Number(process.env.RATE_LIMIT_WINDOW_MS || 15*60*1000);\nconst MAX_REQ = Number(process.env.RATE_LIMIT_MAX || 300);\nconst globalLimiter = rateLimit({ windowMs: WINDOW_MS, limit: MAX_REQ, standardHeaders: true, legacyHeaders: false, message: { error: 'Too many requests' } });\napp.use(globalLimiter);\n\nconst authLimiter = rateLimit({ windowMs: Number(process.env.AUTH_RATE_LIMIT_WINDOW_MS || 10*60*1000), limit: Number(process.env.AUTH_RATE_LIMIT_MAX || 10), standardHeaders: true, legacyHeaders: false, keyGenerator: (req, _res) => { try { const ip = req.ip || ''; const email = (req.body?.email || '').toString().toLowerCase().trim(); return ip + ':' + email; } catch { return req.ip || 'unknown'; } }, message: { error: 'Too many login attempts. Please try again later.' } });\n\n
+ensureAdmin().catch(console.error);
+
+// Rate limits
+const WINDOW_MS = Number(process.env.RATE_LIMIT_WINDOW_MS || 15 * 60 * 1000);
+const MAX_REQ = Number(process.env.RATE_LIMIT_MAX || 300);
+const globalLimiter = rateLimit({
+  windowMs: WINDOW_MS,
+  limit: MAX_REQ,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many requests' },
+});
+app.use(globalLimiter);
+
+const authLimiter = rateLimit({
+  windowMs: Number(process.env.AUTH_RATE_LIMIT_WINDOW_MS || 10 * 60 * 1000),
+  limit: Number(process.env.AUTH_RATE_LIMIT_MAX || 10),
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req, _res) => {
+    try {
+      const ip = req.ip || '';
+      const email = (req.body?.email || '').toString().toLowerCase().trim();
+      return ip + ':' + email;
+    } catch {
+      return req.ip || 'unknown';
+    }
+  },
+  message: { error: 'Too many login attempts. Please try again later.' },
+});
 
 // Provide /api/me for frontend boot
 app.get('/api/me', auth, async (req, res) => {
@@ -59,3 +88,6 @@ app.use((err, _req, res, _next) => {
 });
 
 export default app;
+
+
+
